@@ -1,23 +1,73 @@
-import logo from './logo.svg';
+//react
+import { useState, useEffect} from 'react'
+
+//components
+import Movie from './components/movie'
+
+//styles
 import './App.css';
 
-function App() {
+//import the API config file
+import { API } from './api'
+
+const App = () => {
+
+  const [movies, setMovies] = useState([])
+
+  useEffect(() => {
+    loadMovies()
+  }, [])
+
+  const loadMovies = async () => {
+    let result = await fetch(`${API.base}/all`, { method: `GET`})
+    let data = await result.json()
+    setMovies(data)
+  }
+
+  const deleteMovieHandler = async (id) => {
+    let result = await fetch(`${API.base}/delete/${id}`, { method: `DELETE`})
+    let data = await result.json()
+    console.log(`delete data =>`, data)
+
+    //טיפול אם ניגשים לזה לפני שניגשים לדף הראשי איכשהו או שאין נתונים
+    if (data !== undefined) 
+    {
+      loadMovies()
+    }
+  }
+
+  const updateMovieHandler = async (id) => {
+    let result = await fetch(`${API.base}/update/${id}`, { method: `PUT`})
+    let data = await result.json()
+    console.log(`update data =>`, data)
+
+    if (data !== undefined) 
+    {
+      loadMovies()
+    }
+  }
+
+  const addMovieHandler = async (id) => {
+    let result = await fetch(`${API.base}/movies/add`, { method: `PUT`})
+    let data = await result.json()
+    console.log(`update data =>`, data)
+
+    if (data !== undefined) 
+    {
+      loadMovies()
+    }
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {
+        movies.map(movie => <Movie
+          key={movie.id}
+          movie={movie}
+          updateMovie={updateMovieHandler}
+          deleteMovie={deleteMovieHandler}
+          ></Movie>)
+      }
     </div>
   );
 }
